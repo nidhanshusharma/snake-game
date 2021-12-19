@@ -1,17 +1,15 @@
+//Initializing Canvas
+
 var canvas = document.querySelector("canvas");
 var c = canvas.getContext("2d");
+
+// Initializing Global variables
 
 var size = (window.innerHeight - 100) / 20;
 var dim = {
     rows:20,
     columns:20
 };
-
-if(window.innerWidth < 758 || window.innerHeight < 768){
-    size = (window.innerWidth - 40) / 20;
-}
-
-console.log(window.innerWidth);
 
 var w = canvas.width = size * dim.rows;
 var h = canvas.height = size * dim.columns;
@@ -42,10 +40,21 @@ var velocity = {
 var parts = [];
 var taillength = 2;
 
-function clearScreen(){
-    c.fillStyle = "#000";
-    c.fillRect(0,0,w,h);
+// Loading media files
+
+var biteSound = new Audio("audio/bite.wav");
+biteSound.volume = 0.5;
+biteSound.playbackRate = 1.5;
+
+var levelUpSound = new Audio("audio/level.mp3");
+
+// Checking for mobile screen and reducing the size of canvas
+
+if(window.innerWidth < 758 || window.innerHeight < 768){
+    size = (window.innerWidth - 40) / 20;
 }
+
+// Defining a class for parts of snake's body
 
 class Part{
     constructor(x,y){
@@ -53,13 +62,13 @@ class Part{
         this.y = y;
     }
 }
-
-var biteSound = new Audio("audio/bite.wav");
-biteSound.volume = 0.5;
-biteSound.playbackRate = 1.5;
-
+// function to clear the canvas every frame
+function clearScreen(){
+    c.fillStyle = "#000";
+    c.fillRect(0,0,w,h);
+}
+// draw snake function
 function drawSnake(){
-
     for(let i = 0;i<parts.length;i++){
         let n = parts[i];
         c.fillStyle = "white";
@@ -76,7 +85,7 @@ function drawSnake(){
     c.fillRect(head.x * size,head.y * size,size,size);
     c.strokeRect(head.x * size,head.y * size,size,size);
 }
-
+// create grid function
 function createGrid(){
     for(let i=0;i<dim.rows;i++){
         grid[i] = [];
@@ -92,9 +101,7 @@ function createGrid(){
         }
     }
 }
-
-var levelUpSound = new Audio("audio/level.mp3");
-
+// checking colision detection with the food
 function onFoodBite(){
     if(food.x === head.x && food.y === head.y){
         food.x = Math.floor(Math.random()*dim.rows);
@@ -116,7 +123,7 @@ function onFoodBite(){
     }
     // console.log("yes");
 }
-
+// function to draw UI when game ends
 function drawGameOver() {
     removeEventListener("keypress",()=>{});
     document.querySelector("#game-over").classList.remove("remove-modal");
@@ -129,13 +136,8 @@ function drawGameOver() {
     if(localStorage.getItem(userName+"-score")){
         localStorage.setItem(userName+"-score",score);
     }
-    // c.font = size*2 +"px verdana";
-    // c.fillStyle = "rgba(0,0,0,0.7)";
-    // c.fillRect(0,0,w,h);
-    // c.fillStyle = "white";
-    // c.fillText("Game Over!",w/2 - size*4 - size,h/2);
 }
-
+// function to check if game is over
 function isGameOver() {
     let gameOver = false;
 
@@ -169,12 +171,12 @@ function isGameOver() {
     }
     return gameOver;
 }
-
+// function to change snake's piosition
 function changeSnakePosition() {
     head.x = head.x + velocity.x;
     head.y = head.y + velocity.y;
 }
-
+// function to draw food
 function drawFood(){
     c.beginPath();
     c.shadowColor = "white";
@@ -214,7 +216,7 @@ function drawFood(){
     c.shadowOffsetY = 0;
     c.shadowColor = "orange";
 }
-
+// function to reset global variables and restart the game
 function restartGame() {
     grid = [];
 
@@ -248,7 +250,7 @@ function restartGame() {
     },360);
     animate();
 }
-
+// function to check if user pressed Space key for restart
 function checkForRestart(){
     window.addEventListener("keypress",(e)=>{
         if(e.key === " "){
@@ -256,7 +258,7 @@ function checkForRestart(){
         }
     });
 }
-
+// function to print leaderboard data
 function printLeaderBoard() {
     let data = getLocalStorageData();
     let dataDiv = document.querySelector("#data");
@@ -272,8 +274,19 @@ function printLeaderBoard() {
     }
 }
 
-var timeoutId;
+// function to get data from localStorage
+function getLocalStorageData() {
+    let localData = [];
+    keys = Object.keys(localStorage);
+    
+    for(let i = 0;i<keys.length;i++){
+        localData.push(localStorage.getItem(keys[i]));
+    }
+    return {keys:keys,values:localData};
+}
 
+// Animate function to get the game moving
+var timeoutId;
 function animate(){
     changeSnakePosition();
     if(isGameOver()){
@@ -290,24 +303,26 @@ function animate(){
     timeoutId = setTimeout(animate,1000/speed);
 }
 
+animate();
+
+// function to update the score and levels
 function updateScore() {
     document.querySelector("#score").innerHTML = ""+score;
     document.querySelector("#level").innerHTML = ""+level;
 }
 
-animate();
-
-function easyMode() {
+// functions to change modes
+document.querySelector("#easy").addEventListener("focus",()=>{
     speed = 10;
-}
-
-function mediumMode() {
+});
+document.querySelector("#medium").addEventListener("focus",()=>{
     speed = 15;
-}
-
-function hardMode() {
+});
+document.querySelector("#hard").addEventListener("focus",()=>{
     speed = 20;
-}
+});
+
+// adding user to localStorage if he proceeds to fill the form
 
 var form = document.querySelector("form");
 form.addEventListener("submit",(e)=>{
@@ -317,6 +332,8 @@ form.addEventListener("submit",(e)=>{
     localStorage.setItem(form.name.value+"-user",form.name.value);
     localStorage.setItem(form.name.value+"-score",score);
 });
+
+// skipping start screen and activating user inputs to kick start the game whenever user starts pressing keys
 
 document.querySelector("#skip").addEventListener("click",skipStart);
 document.querySelector("#skip").addEventListener("active",skipStart);
@@ -393,16 +410,7 @@ function skipStart() {
     });
 }
 
-// console.log(localStorage);
+// Adding restart game functionalities when user clicks play again button
+
 document.querySelector("#play-again").addEventListener("click",restartGame);
 document.querySelector("#play-again").addEventListener("active",restartGame);
-
-function getLocalStorageData() {
-    let localData = [];
-    keys = Object.keys(localStorage);
-    
-    for(let i = 0;i<keys.length;i++){
-        localData.push(localStorage.getItem(keys[i]));
-    }
-    return {keys:keys,values:localData};
-}
