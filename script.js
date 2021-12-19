@@ -251,7 +251,6 @@ function restartGame() {
 
 function checkForRestart(){
     window.addEventListener("keypress",(e)=>{
-        e.preventDefault();
         if(e.key === " "){
             restartGame();
         }
@@ -332,7 +331,6 @@ function skipStart() {
         document.querySelector(".dark").style.display="none";
     },360);
     addEventListener("keydown",(e)=>{
-        e.preventDefault();
         if(e.key === "w" || e.key === "ArrowUp"){
             if(velocity.y == 1){
                 return;
